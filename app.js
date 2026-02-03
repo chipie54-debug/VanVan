@@ -266,6 +266,40 @@ window.deleteMedia = deleteMedia; // Expose for onclick
 // Memory cache for editing
 let currentReservations = [];
 
+function renderReservations(reservations) {
+    const contenedor = document.getElementById('reservations-grid');
+    if (!contenedor) return;
+
+    const searchTerm = document.getElementById('reservation-search')?.value.toLowerCase() || "";
+    const statusFilter = document.getElementById('status-filter')?.value || "all";
+
+    contenedor.innerHTML = '';
+    currentReservations = reservations; // Update cache
+
+    const filtered = reservations.filter(res => {
+        const name = res.name?.toLowerCase() || "";
+        const phone = res.phone || "";
+        const email = res.email?.toLowerCase() || "";
+        
+        const matchesSearch = name.includes(searchTerm) || 
+                             phone.includes(searchTerm) || 
+                             email.includes(searchTerm);
+        
+        const matchesStatus = statusFilter === "all" || res.status === statusFilter;
+        
+        return matchesSearch && matchesStatus;
+    });
+
+    if (filtered.length === 0) {
+        contenedor.innerHTML = '<div class="no-data">No se encontraron reservas.</div>';
+        return;
+    }
+
+    filtered.forEach(res => {
+        contenedor.innerHTML += createReservationCard(res);
+    });
+}
+
 function listenToReservations() {
   const grid = document.getElementById("reservations-grid");
   if (!grid) return;
