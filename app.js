@@ -404,14 +404,16 @@ async function saveReservation(e) {
     }
 }
 
-// Event Listeners
-btnNew.addEventListener('click', openModal);
-btnCancel.addEventListener('click', closeModal);
-btnClose.addEventListener('click', closeModal);
-checkInInput.addEventListener('change', calculateNights);
-checkOutInput.addEventListener('change', calculateNights);
-form.addEventListener('submit', saveReservation);
-document.getElementById('delete-reservation').addEventListener('click', deleteReservation);
+// Event Listeners with safety checks
+if (btnNew) btnNew.addEventListener('click', openModal);
+if (btnCancel) btnCancel.addEventListener('click', closeModal);
+if (btnClose) btnClose.addEventListener('click', closeModal);
+if (checkInInput) checkInInput.addEventListener('change', calculateNights);
+if (checkOutInput) checkOutInput.addEventListener('change', calculateNights);
+if (form) form.addEventListener('submit', saveReservation);
+
+const btnDelete = document.getElementById('delete-reservation');
+if (btnDelete) btnDelete.addEventListener('click', deleteReservation);
 
 // Logout logic
 const handleLogout = async (e) => {
@@ -450,10 +452,12 @@ if (statusFilter) {
     statusFilter.addEventListener('change', () => renderReservations(currentReservations));
 }
 
-// Expose editReservation to global scope for onclick in HTML strings
+// Expose to global scope for onclick in HTML strings
 window.editReservation = editReservation;
-
-// Navigation Click Handlers
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.nav = nav;
+window.handleNavClick = handleNavClick;
 document.querySelectorAll(".nav-item, .mobile-nav-item").forEach(item => {
     item.addEventListener("click", (e) => {
         e.preventDefault();
