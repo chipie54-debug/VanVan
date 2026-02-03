@@ -277,14 +277,8 @@ function listenToReservations() {
     snapshot.forEach((doc) => {
       reservations.push({ id: doc.id, ...doc.data() });
     });
-    currentReservations = reservations; // Update cache
-
-    // Update Grid View
-    if (reservations.length === 0) {
-      grid.innerHTML = '<div class="no-data">No hay reservas activas.</div>';
-    } else {
-      grid.innerHTML = reservations.map((res) => createReservationCard(res)).join("");
-    }
+    
+    renderReservations(reservations); // Call the new render function
 
     // Update Calendar View
     generarCalendario(reservations);
@@ -443,6 +437,17 @@ if (uploadInput) {
     uploadInput.addEventListener('change', (e) => {
         if (e.target.files[0]) uploadMedia(e.target.files[0]);
     });
+}
+
+// Search and Filter Listeners
+const searchInput = document.getElementById('reservation-search');
+const statusFilter = document.getElementById('status-filter');
+
+if (searchInput) {
+    searchInput.addEventListener('input', () => renderReservations(currentReservations));
+}
+if (statusFilter) {
+    statusFilter.addEventListener('change', () => renderReservations(currentReservations));
 }
 
 // Expose editReservation to global scope for onclick in HTML strings
