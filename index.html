@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Reservas - Autocaravana</title>
+    <link rel="stylesheet" href="styles.css?v=2.0" />
+    <!-- Guard against unauthenticated access -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      import firebaseConfig from "./firebase-config.js";
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          window.location.href = 'login.html';
+        }
+      });
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="logo">
+          <i class="fas fa-caravan"></i>
+          <span>Autocaravana</span>
+        </div>
+        <nav class="nav-menu">
+          <a href="#" class="nav-item active" data-view="resumen">
+            <i class="fas fa-th-large"></i>
+            <span>Resumen</span>
+          </a>
+          <div class="nav-group">Gestión</div>
+          <a href="#" class="nav-item" data-view="calendario">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Calendario</span>
+          </a>
+          <a href="#" class="nav-item" data-view="reservas">
+            <i class="fas fa-book"></i>
+            <span>Reservas</span>
+          </a>
+          <a href="#" class="nav-item" data-view="historial">
+            <i class="fas fa-history"></i>
+            <span>Historial</span>
+          </a>
+          <a href="#" class="nav-item" data-view="galeria">
+            <i class="fas fa-images"></i>
+            <span>Galería</span>
+          </a>
+          <div class="nav-group">Finanzas</div>
+          <a href="#" class="nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Pagos</span>
+          </a>
+          <div class="nav-group">Sistema</div>
+          <a href="#" class="nav-item" id="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Cerrar Sesión</span>
+          </a>
+        </nav>
+        <div class="sidebar-footer">
+          <span class="version-tag">v2.0</span>
+        </div>
+      </aside>
+
+      <!-- Mobile Header -->
+      <header class="mobile-header">
+        <div class="logo">
+          <i class="fas fa-caravan"></i>
+          <span>Autocaravana</span>
+        </div>
+        <button id="mobile-menu-btn" class="btn-icon">
+          <i class="fas fa-bars"></i>
+        </button>
+      </header>
+
+      <!-- Mobile Menu Overlay -->
+      <div id="mobile-menu-overlay" class="mobile-menu-overlay">
+        <div class="mobile-menu-content">
+          <div class="mobile-menu-header">
+            <div class="logo">
+              <i class="fas fa-caravan"></i>
+              <span>Menú</span>
+            </div>
+            <button id="close-mobile-menu" class="btn-icon">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <nav class="mobile-nav">
+            <a href="#" class="mobile-nav-item active" data-view="resumen">
+              <i class="fas fa-th-large"></i>
+              <span>Resumen</span>
+            </a>
+            <div class="nav-group">Gestión</div>
+            <a href="#" class="mobile-nav-item" data-view="calendario">
+              <i class="fas fa-calendar-alt"></i>
+              <span>Calendario</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-view="reservas">
+              <i class="fas fa-book"></i>
+              <span>Reservas</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-view="historial">
+              <i class="fas fa-history"></i>
+              <span>Historial</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-view="galeria">
+              <i class="fas fa-images"></i>
+              <span>Galería</span>
+            </a>
+            <div class="nav-group">Finanzas</div>
+            <a href="#" class="mobile-nav-item" data-view="pagos">
+              <i class="fas fa-wallet"></i>
+              <span>Pagos</span>
+            </a>
+            <div class="nav-group">Sistema</div>
+            <a href="#" class="mobile-nav-item" id="mobile-logout-btn">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Cerrar Sesión</span>
+            </a>
+          </nav>
+          <div class="mobile-menu-footer">
+            <span class="version-tag">v2.0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- View: Resumen (Active Reservations) -->
+        <section id="view-resumen" class="view-section active">
+          <header class="main-header">
+            <h1 id="view-title">Resumen</h1>
+            <div class="header-actions">
+              <button id="new-reservation-btn" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nueva Reserva
+              </button>
+            </div>
+          </header>
+
+          <section class="reservations-section">
+            <div class="section-title">
+              <i class="fas fa-bed"></i>
+              <h2>Reservas Activas</h2>
+            </div>
+
+            <div id="reservations-grid" class="reservations-grid">
+              <!-- Cards will be injected here -->
+              <div class="loading">Cargando reservas...</div>
+            </div>
+          </section>
+        </section>
+
+        <!-- View: Calendario -->
+        <section id="view-calendario" class="view-section">
+          <header class="main-header">
+            <h1>Calendario</h1>
+            <div class="header-actions">
+              <div class="calendar-legend">
+                <span class="legend-item"><span class="legend-color legend-active"></span> Activa</span>
+                <span class="legend-item"><span class="legend-color legend-future"></span> Futura</span>
+                <span class="legend-item"><span class="legend-color legend-past"></span> Pasada</span>
+                <span class="legend-item"><span class="legend-color legend-conflict"></span> Conflicto</span>
+              </div>
+            </div>
+          </header>
+          <div id="calendario-container" class="calendario-container">
+            <div class="loading">Cargando calendario...</div>
+          </div>
+        </section>
+        <!-- View: Galería Admin -->
+        <section id="view-galeria" class="view-section">
+          <header class="main-header">
+            <h1>Gestión de Galería</h1>
+            <div class="header-actions">
+              <label class="btn btn-primary" style="cursor: pointer;">
+                <i class="fas fa-upload"></i> Subir Foto/Vídeo
+                <input type="file" id="upload-media" hidden accept="image/*,video/*">
+              </label>
+            </div>
+          </header>
+          
+          <div class="gallery-admin-container">
+            <div id="gallery-admin-grid" class="gallery-grid">
+               <!-- Injected by JS -->
+               <div class="loading">Cargando galería...</div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <!-- Modal Nueva Reserva -->
+    <div id="reservation-modal" class="modal">
+        <div class="modal-content">
+            <header class="modal-header">
+                <div class="modal-title">
+                    <i class="far fa-calendar-alt"></i>
+                    <h2 id="modal-title-text">Nueva Reserva</h2>
+                </div>
+                <div class="modal-header-actions">
+                    <button class="btn-icon btn-whatsapp" title="WhatsApp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    <button class="btn-icon btn-web" title="Web"><i class="fas fa-globe"></i> Web</button>
+                    <button id="close-modal" class="btn-close">&times;</button>
+                </div>
+            </header>
+
+            <form id="reservation-form">
+                <input type="hidden" id="reservation-id" name="id">
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label>FECHA RESERVA</label>
+                        <input type="date" name="bookingDate" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="far fa-user"></i>
+                        <span>DATOS INQUILINO</span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label>Nombre Completo</label>
+                            <input type="text" name="name" placeholder="Ej. Juan Pérez" required>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Nacionalidad</label>
+                            <input type="text" name="nationality" placeholder="Ej. España">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label>Email</label>
+                            <input type="email" name="email" placeholder="ejemplo@gmail.com">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Teléfono</label>
+                            <input type="tel" name="phone" placeholder="+34 600 000 000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label>ENTRADA</label>
+                        <input type="date" name="checkIn" required>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label>SALIDA</label>
+                        <input type="date" name="checkOut" required>
+                    </div>
+                    <div class="form-group flex-half text-center">
+                        <label>NOCHES</label>
+                        <div id="nights-count" class="read-only-box">0</div>
+                    </div>
+                    <div class="form-group flex-half text-center">
+                        <label>PAX</label>
+                        <input type="number" name="guests" value="1" min="1">
+                    </div>
+                </div>
+
+                <div class="price-section">
+                    <div class="price-container">
+                        <label>PRECIO TOTAL (€)</label>
+                        <input type="number" name="price" step="0.01" class="price-input" placeholder="0,00">
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="isPaid">
+                            <span class="checkmark"></span>
+                            Pagado
+                        </label>
+                        <div class="deposit-container">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="isDepositOk">
+                                <span class="checkmark"></span>
+                                Fianza
+                            </label>
+                            <input type="number" name="depositAmount" class="deposit-input" placeholder="0">
+                            <span class="euro-symbol">€</span>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="modal-footer">
+                    <button type="button" id="cancel-reservation" class="btn-outline">Cancelar</button>
+                    <button type="button" id="delete-reservation" class="btn-delete-icon" style="display:none;"><i class="far fa-trash-alt"></i></button>
+                    <button type="submit" class="btn-save"><i class="far fa-save"></i> Guardar</button>
+                </footer>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="app.js?v=2.0"></script>
+</body>
+</html>

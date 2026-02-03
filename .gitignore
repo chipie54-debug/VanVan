@@ -1,0 +1,16 @@
+# Firebase
+.firebase/
+.firebaserc
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# IDEs and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Assistant brain
+.gemini/
+brain/

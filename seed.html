@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sembrador de Datos - Autocaravana</title>
+</head>
+<body>
+    <h1>Poblando base de datos...</h1>
+    <div id="status">Iniciando...</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import firebaseConfig from "./firebase-config.js";
+
+        async function seed() {
+            const status = document.getElementById('status');
+            try {
+                const app = initializeApp(firebaseConfig);
+                const db = getFirestore(app);
+                
+                // Comprobar si ya hay datos
+                const snapshot = await getDocs(collection(db, "reservations"));
+                if (!snapshot.empty) {
+                    status.innerHTML = "✅ La colección 'reservations' ya tiene datos. No se ha hecho nada para evitar duplicados.";
+                    return;
+                }
+
+                const initialReservations = [
+                    { name: "Haitam Choulli", property: "Bruma", status: "Pagado", checkIn: "7 ene", checkOut: "7 feb", source: "Airbnb", guests: 1 },
+                    { name: "David Durnin", property: "Duna", status: "Pagado", checkIn: "7 ene", checkOut: "7 feb", source: "Booking", guests: 1 },
+                    { name: "Felicia Lavre", property: "Coral", status: "Pagado", checkIn: "25 ene", checkOut: "26 mar", source: "Booking", guests: 1 },
+                    { name: "Jorge Luis Pérez Perez", property: "Caracola", status: "Pendiente", checkIn: "2 feb", checkOut: "12 feb", source: "Directa", guests: 1 },
+                    { name: "Daniel M. Martínez", property: "Arena", status: "Pagado", checkIn: "3 feb", checkOut: "3 mar", source: "Directa", guests: 1 }
+                ];
+
+                for (const res of initialReservations) {
+                    await addDoc(collection(db, "reservations"), res);
+                }
+
+                status.innerHTML = "✅ ¡Datos cargados con éxito! Ya puedes cerrar esta pestaña y abrir index.html.";
+            } catch (e) {
+                status.innerHTML = "❌ Error: " + e.message + "<br><br>Asegúrate de haber publicado las reglas de Firestore (allow read, write: if true;)";
+                console.error(e);
+            }
+        }
+
+        seed();
+    </script>
+</body>
+</html>
